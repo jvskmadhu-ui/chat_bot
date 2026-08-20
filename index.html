@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f5f1e8">
+    <title>Orbit | Personal AI assistant</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+        :root {
+            --ink: #202521;
+            --muted: #70766e;
+            --paper: #f5f1e8;
+            --panel: #fffdf8;
+            --line: #dedbd1;
+            --accent: #e35e3b;
+            --accent-dark: #b84026;
+            --green: #5c8064;
+            --shadow: 0 24px 70px rgba(50, 44, 31, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--ink);
+            background: var(--paper);
+            font-family: 'Manrope', sans-serif;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        .screen {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            background: radial-gradient(circle at 12% 12%, #fbe2c7 0 12%, transparent 33%), radial-gradient(circle at 93% 84%, #cbdccd 0 10%, transparent 31%), var(--paper);
+        }
+
+        .login-card {
+            width: min(100%, 430px);
+            padding: 44px;
+            border: 1px solid rgba(255, 255, 255, .7);
+            border-radius: 18px;
+            background: rgba(255, 253, 248, .82);
+            box-shadow: var(--shadow);
+            animation: rise .55s ease both;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            font-weight: 800;
+            letter-spacing: -.04em;
+            font-size: 1.2rem;
+        }
+
+        .brand-mark {
+            width: 30px;
+            height: 30px;
+            display: grid;
+            place-items: center;
+            color: white;
+            border-radius: 9px 9px 9px 2px;
+            background: var(--accent);
+            font-size: .82rem;
+        }
+
+        .login-card h1 {
+            margin: 54px 0 10px;
+            font-size: clamp(2rem, 7vw, 3rem);
+            line-height: 1.02;
+            letter-spacing: -.07em;
+        }
+
+        .login-card p {
+            color: var(--muted);
+            line-height: 1.7;
+            margin: 0 0 30px;
+        }
+
+        .field {
+            display: block;
+            margin: 15px 0;
+            color: var(--muted);
+            font-size: .75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+        }
+
+        .field input {
+            width: 100%;
+            margin-top: 8px;
+            padding: 14px 15px;
+            border: 1px solid var(--line);
+            border-radius: 9px;
+            outline: none;
+            color: var(--ink);
+            background: #fff;
+        }
+
+        .field input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(227, 94, 59, .12);
+        }
+
+        .primary {
+            width: 100%;
+            margin-top: 14px;
+            padding: 15px;
+            border: 0;
+            border-radius: 9px;
+            color: #fff;
+            background: var(--ink);
+            font-weight: 800;
+            transition: transform .2s, background .2s;
+        }
+
+        .primary:hover {
+            transform: translateY(-2px);
+            background: var(--accent-dark);
+        }
+
+        .login-note {
+            margin-top: 18px !important;
+            font: .7rem 'DM Mono', monospace;
+            text-align: center;
+        }
+
+        .app {
+            display: none;
+            min-height: 100vh;
+            grid-template-columns: 250px minmax(0, 1fr);
+        }
+
+        .app.active {
+            display: grid;
+        }
+
+        aside {
+            display: flex;
+            flex-direction: column;
+            padding: 26px 18px;
+            border-right: 1px solid var(--line);
+            background: #eeeadf;
+        }
+
+        .side-label {
+            margin: 52px 12px 13px;
+            color: var(--muted);
+            font: .64rem 'DM Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+        }
+
+        .nav-item {
+            width: 100%;
+            padding: 11px 12px;
+            border: 0;
+            border-radius: 8px;
+            color: var(--ink);
+            background: transparent;
+            text-align: left;
+            font-weight: 700;
+        }
+
+        .nav-item.active,
+        .nav-item:hover {
+            background: #fffdf8;
+        }
+
+        .nav-item span {
+            display: inline-block;
+            width: 25px;
+            color: var(--accent);
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: auto;
+            padding: 13px 10px;
+            border-top: 1px solid var(--line);
+            font-size: .8rem;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            color: white;
+            background: var(--green);
+            font-weight: 800;
+        }
+
+        .profile small {
+            display: block;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .logout {
+            margin-left: auto;
+            border: 0;
+            color: var(--muted);
+            background: transparent;
+            font-size: 1.1rem;
+        }
+
+        main {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px clamp(20px, 5vw, 70px);
+            border-bottom: 1px solid var(--line);
+        }
+
+        header h2 {
+            margin: 0;
+            font-size: 1rem;
+            letter-spacing: -.03em;
+        }
+
+        .status {
+            color: var(--green);
+            font: .68rem 'DM Mono', monospace;
+        }
+
+        .status i {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            margin-right: 5px;
+            border-radius: 50%;
+            background: #7aa979;
+        }
+
+        .conversation {
+            width: min(100%, 850px);
+            flex: 1;
+            margin: 0 auto;
+            padding: 58px clamp(20px, 5vw, 70px) 25px;
+            overflow-y: auto;
+        }
+
+        .intro {
+            margin-bottom: 45px;
+            animation: rise .55s ease both;
+        }
+
+        .eyebrow {
+            color: var(--accent);
+            font: .68rem 'DM Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: .13em;
+        }
+
+        .intro h1 {
+            max-width: 570px;
+            margin: 13px 0;
+            font-size: clamp(2.4rem, 6vw, 4.8rem);
+            line-height: .98;
+            letter-spacing: -.08em;
+        }
+
+        .intro p {
+            max-width: 450px;
+            color: var(--muted);
+            line-height: 1.65;
+        }
+
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+            margin-top: 22px;
+        }
+
+        .suggestion {
+            padding: 9px 13px;
+            border: 1px solid var(--line);
+            border-radius: 99px;
+            color: var(--muted);
+            background: transparent;
+            font-size: .76rem;
+        }
+
+        .suggestion:hover {
+            color: var(--accent-dark);
+            border-color: var(--accent);
+            background: #fff9ef;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            margin: 20px 0;
+            animation: rise .25s ease both;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .bubble {
+            max-width: min(75%, 590px);
+            padding: 13px 16px;
+            border-radius: 4px 14px 14px 14px;
+            line-height: 1.55;
+            font-size: .9rem;
+            background: #e7e2d6;
+        }
+
+        .user .bubble {
+            border-radius: 14px 4px 14px 14px;
+            color: white;
+            background: var(--ink);
+        }
+
+        .bot-mark {
+            flex: 0 0 27px;
+            width: 27px;
+            height: 27px;
+            display: grid;
+            place-items: center;
+            border-radius: 8px 8px 8px 2px;
+            color: white;
+            background: var(--accent);
+            font-size: .7rem;
+        }
+
+        .composer-wrap {
+            width: min(100%, 850px);
+            margin: 0 auto;
+            padding: 12px clamp(20px, 5vw, 70px) 26px;
+        }
+
+        .composer {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 7px 6px 16px;
+            border: 1px solid var(--line);
+            border-radius: 13px;
+            background: var(--panel);
+            box-shadow: 0 8px 25px rgba(50, 44, 31, .06);
+        }
+
+        .composer input {
+            flex: 1;
+            min-width: 0;
+            border: 0;
+            outline: 0;
+            color: var(--ink);
+            background: transparent;
+        }
+
+        .send {
+            width: 38px;
+            height: 38px;
+            border: 0;
+            border-radius: 9px;
+            color: #fff;
+            background: var(--accent);
+            font-size: 1.1rem;
+        }
+
+        .send:hover {
+            background: var(--accent-dark);
+        }
+
+        .disclaimer {
+            margin: 9px 0 0;
+            color: #9a9b92;
+            font: .62rem 'DM Mono', monospace;
+            text-align: center;
+        }
+
+        @keyframes rise {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 680px) {
+            .app.active {
+                display: block;
+            }
+
+            aside {
+                display: none;
+            }
+
+            header {
+                padding: 19px 20px;
+            }
+
+            .conversation {
+                padding-top: 38px;
+            }
+
+            .intro {
+                margin-bottom: 35px;
+            }
+
+            .bubble {
+                max-width: 84%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <section class="screen" id="loginScreen">
+        <form class="login-card" id="loginForm">
+            <div class="brand"><span class="brand-mark">O</span> orbit</div>
+            <h1>A quieter way to think.</h1>
+            <p>Your personal space for quick answers, useful ideas, and getting unstuck.</p>
+            <label class="field">Your name<input id="nameInput" type="text" placeholder="e.g. Alex" autocomplete="name"
+                    required></label>
+            <label class="field">Email address<input type="email" placeholder="you@example.com" autocomplete="email"
+                    required></label>
+            <button class="primary" type="submit">Enter Orbit <span aria-hidden="true">&rarr;</span></button>
+            <p class="login-note">Demo access &middot; no account required</p>
+        </form>
+    </section>
+
+    <section class="app" id="appShell">
+        <aside>
+            <div class="brand"><span class="brand-mark">O</span> orbit</div>
+            <div class="side-label">Workspace</div>
+            <button class="nav-item active"><span>+</span> New conversation</button>
+            <button class="nav-item"><span>&#9679;</span> Recent chats</button>
+            <div class="profile"><span class="avatar" id="avatar">A</span>
+                <div><strong id="profileName">Alex</strong><small>Personal workspace</small></div><button class="logout"
+                    id="logout" title="Log out">&times;</button>
+            </div>
+        </aside>
+        <main>
+            <header>
+                <h2>New conversation</h2><span class="status"><i></i> Online</span>
+            </header>
+            <div class="conversation" id="conversation">
+                <div class="intro" id="intro"><span class="eyebrow">Good to see you</span>
+                    <h1>What’s on your mind?</h1>
+                    <p>Ask anything. Orbit is ready to help you find the next clear step.</p>
+                    <div class="suggestions"><button class="suggestion">Tell me a fun fact</button><button
+                            class="suggestion">What can you do?</button><button class="suggestion">Tell me a
+                            joke</button></div>
+                </div>
+            </div>
+            <div class="composer-wrap">
+                <form class="composer" id="chatForm"><input id="messageInput" maxlength="500"
+                        placeholder="Message Orbit..." autocomplete="off" required><button class="send" type="submit"
+                        title="Send message" aria-label="Send message">&uarr;</button></form>
+                <p class="disclaimer">Orbit can make mistakes. Check important information.</p>
+            </div>
+        </main>
+    </section>
+    <script>
+        const loginScreen = document.getElementById('loginScreen');
+        const appShell = document.getElementById('appShell');
+        const loginForm = document.getElementById('loginForm');
+        const nameInput = document.getElementById('nameInput');
+        const profileName = document.getElementById('profileName');
+        const avatar = document.getElementById('avatar');
+        const chatForm = document.getElementById('chatForm');
+        const messageInput = document.getElementById('messageInput');
+        const conversation = document.getElementById('conversation');
+        const intro = document.getElementById('intro');
+
+        function showApp(name) {
+            const displayName = name.trim() || 'Alex';
+            profileName.textContent = displayName;
+            avatar.textContent = displayName.charAt(0).toUpperCase();
+            loginScreen.style.display = 'none';
+            appShell.classList.add('active');
+            messageInput.focus();
+        }
+
+        loginForm.addEventListener('submit', (event) => { event.preventDefault(); showApp(nameInput.value); });
+        document.getElementById('logout').addEventListener('click', () => { appShell.classList.remove('active'); loginScreen.style.display = 'grid'; nameInput.focus(); });
+        document.querySelectorAll('.suggestion').forEach((button) => button.addEventListener('click', () => { messageInput.value = button.textContent; chatForm.requestSubmit(); }));
+
+        function addMessage(text, type) {
+            const message = document.createElement('div');
+            message.className = `message ${type}`;
+            message.innerHTML = type === 'bot' ? `<span class="bot-mark">O</span><div class="bubble"></div>` : '<div class="bubble"></div>';
+            message.querySelector('.bubble').textContent = text;
+            conversation.appendChild(message);
+            conversation.scrollTop = conversation.scrollHeight;
+        }
+
+        chatForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const message = messageInput.value.trim();
+            if (!message) return;
+            intro.style.display = 'none';
+            addMessage(message, 'user');
+            messageInput.value = '';
+            messageInput.disabled = true;
+            try {
+                const response = await fetch('/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message }) });
+                const data = await response.json();
+                addMessage(response.ok ? data.response : (data.error || 'Something went wrong.'), 'bot');
+            } catch (error) { addMessage('I could not connect right now. Please try again.', 'bot'); }
+            messageInput.disabled = false;
+            messageInput.focus();
+        });
+    </script>
+</body>
+
+</html>
